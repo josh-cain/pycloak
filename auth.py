@@ -56,7 +56,7 @@ def is_expired(token):
 
 class AuthSession:
 
-    access_token = None
+    __access_token = None
 
     def __init__(self, username, password, host="http://localhost:8080", realm="master", client_id="admin-cli"):
         self.username = username
@@ -66,11 +66,13 @@ class AuthSession:
         self.client_id = client_id
 
     def get_access_token(self):
-        if self.access_token is None or is_expired(self.access_token):
+        if self.__access_token is None or is_expired(self.__access_token):
             token_response = direct_access_grant_token(self.username, self.password, self.host, self.realm, self.client_id)
-            self.access_token = token_response['access_token']
+            self.__access_token = token_response['access_token']
 
-        return self.access_token
+        return self.__access_token
+
+    access_token = property(get_access_token)
 
 class AuthException(Exception):
 
