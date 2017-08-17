@@ -1,7 +1,9 @@
 
 import json
+import jwt
 import logging
 import requests
+import time
 import urllib.parse
 import urllib.request
 
@@ -14,7 +16,7 @@ def direct_access_grant_token(username, password, host="http://localhost:8080", 
 
     Returned JSON objects will look like this:
     {'access_token': 'ey...2w', 'expires_in': 60, 'refresh_expires_in': 1800,
-    'refresh_token': 'ey..Og', 'not-before-policy': 0, 'session_state': '5ca9ccf7-b425-4fe8-81a1-8bbd770ee312'}
+    'refresh_token': 'ey..Og', 'not-before-policy': 0, 'session_state': '5ca9ccf7-b425-4fe8-81a1-8bbd770ee312', 'token_type': 'bearer'}
 
     @param username: user for which the token is to be granted
     @param password: user's password
@@ -36,6 +38,39 @@ def direct_access_grant_token(username, password, host="http://localhost:8080", 
 
     return json.loads(token_response.text)
 
+def is_expired(token):
+    """
+    Takes a base-64 encoded representation of a JSON web token and determines if it is expired.  Note that this is the *only* check it performs.
+
+    @param token: base-64 encoded representation of JWT
+    @return: true if expired, false if non-expired
+    """
+    decoded_jwt = jwt.decode(token, verify=False)
+    try:
+        exp = int(decoded_jwt['exp'])
+    except ValueError:
+        logging.error('Could not determine token expiry using "exp" claim.  Pleave validate that valid tokens are being returned from the endpoint.')
+        raise AuthException("Could not determine token expiry")
+
+    return exp < int(time.time())
+
+class AuthSession:
+
+    access_token = None
+
+    def __init__(self, username, password, host="http://localhost:8080", realm="master", client_id="admin-cli"):
+        self.username = username
+        self.password = password
+        self.host = host
+        self.realm = realm
+        self.client_id = client_id
+
+    def get_access_token(self):
+        if self.access_token is None or is_expired(self.access_token):
+            token_response = direct_access_grant_token(self.username, self.password, self.host, self.realm, self.client_id)
+            self.access_token = token_response['access_token']
+
+        return self.access_token
 
 class AuthException(Exception):
 
