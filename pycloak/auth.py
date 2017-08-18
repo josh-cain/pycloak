@@ -67,12 +67,17 @@ class AuthSession:
 
     def get_access_token(self):
         if self.__access_token is None or is_expired(self.__access_token):
+            logging.debug('Using direct access grant to acquire access token.')
             token_response = direct_access_grant_token(self.username, self.password, self.host, self.realm, self.client_id)
             self.__access_token = token_response['access_token']
 
         return self.__access_token
 
+    def bearer_header(self):
+        return {'Authorization': "Bearer {}".format(self.get_access_token())}
+
     access_token = property(get_access_token)
+    bearer_header = property(bearer_header)
 
 class AuthException(Exception):
 

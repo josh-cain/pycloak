@@ -3,18 +3,18 @@
 
 This Python package is for interacting with the Keycloak admin interface.  So far it only grabs access tokens for you like so:
 ```
->>> import auth
->>> session = auth.AuthSession('admin', 'password')
->>> session.access_token
+import pycloak.admin
+import pycloak.auth
+
+session = pycloak.auth.AuthSession('admin', 'password')
+admin = pycloak.admin.Admin(session)
+admin.realms
+admin.realm('master')
 ```
 
 More to come soon!
 
 ### Hacking
-
-Required libraries:
-
- - PyJWT
 
 Stand up a KC server locally:
 ```
