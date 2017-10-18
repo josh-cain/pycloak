@@ -17,6 +17,21 @@ More to come soon!
 ### Hacking
 
 Stand up a KC server locally:
+
 ```
 docker run --rm -it -e KEYCLOAK_USER=admin -e KEYCLOAK_PASSWORD=password -p 8080:8080 jboss/keycloak
+```
+
+// hacking goes here
+
+Use pip for local install:
+
+```
+pip3 install -e .
+```
+
+Then run tests to validate:
+
+```
+py.test
 ```
