@@ -2,7 +2,7 @@
 import json
 import logging
 import requests
-
+from pycloak import realm
 
 class Admin:
 
@@ -31,7 +31,7 @@ class Admin:
             raise AdminException(
                 "Could not retrieve realm {}".format(realm_name))
 
-        return json.loads(realm_response.text)
+        return realm.Realm(self.auth_session, json.loads(realm_response.text));
 
     def add_realm(self, realm_id, enabled=True):
         realms_url = "{0}/auth/admin/realms".format(self.auth_session.host)

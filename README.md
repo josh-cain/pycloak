@@ -35,3 +35,8 @@ Then run tests to validate:
 ```
 py.test
 ```
+
+Or, if python 3 is not the default:
+```
+python -m pytest .
+```
