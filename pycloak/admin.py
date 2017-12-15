@@ -22,10 +22,8 @@ class Admin:
     realms = property(get_realms)
 
     def realm(self, realm_name):
-        realms_url = "{0}/auth/admin/realms/{1}".format(
-            self.auth_session.host, realm_name)
-        realm_response = requests.get(
-            realms_url, headers=self.auth_session.bearer_header)
+        realms_url = "{0}/auth/admin/realms/{1}".format(self.auth_session.host, realm_name)
+        realm_response = requests.get(realms_url, headers=self.auth_session.bearer_header)
 
         if (realm_response.status_code != 200):
             raise AdminException(
