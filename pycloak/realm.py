@@ -8,9 +8,9 @@ class Realm:
 
     def __init__(self, auth_session, realm_json):
         self.auth_session = auth_session
-        self.id = realm_json['id']
-        self.realm = realm_json['realm']
-        self.display_name = realm_json['displayName']
+        self.id = realm_json.get('id')
+        self.realm = realm_json.get('realm')
+        self.display_name = realm_json.get('displayName')
 
     # TODO add an optional filter criteria to clients
     def clients(self):

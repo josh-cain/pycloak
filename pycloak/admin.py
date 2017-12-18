@@ -45,8 +45,14 @@ class Admin:
             raise AdminException(
                 "Could not add realm {}".format(realm_id))
 
-        return realm_response.headers['Location']
+        # realm has been added, now retrieve
+        realm_response = requests.get(
+            realm_response.headers['Location'], headers=self.auth_session.bearer_header)
+        if (realm_response.status_code != 200):
+            raise AdminException(
+                "Could not retrieve newly created realm {}".format(realm_name))
 
+        return realm.Realm(self.auth_session, json.loads(realm_response.text))
 
 class AdminException:
 
