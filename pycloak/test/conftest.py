@@ -11,7 +11,7 @@ def admin_password():
 
 @pytest.fixture(scope='session')
 def keycloak_server(request, admin_username, admin_password):
-    print('Starting docker container for Keycloak server...')
+    print('\n\nStarting docker container for Keycloak server...')
     import docker
     import requests
     import time
@@ -32,7 +32,7 @@ def keycloak_server(request, admin_username, admin_password):
             print('Keycloak admin console not available')
 
     def fin():
-        print('Stopping docker container for Keycloak server....')
+        print('\n\nStopping docker container for Keycloak server....')
         # spin down docker container
         pycloak_test_severs = client.containers.list(filters={'name': docker_instance_name})
         if pycloak_test_severs:
