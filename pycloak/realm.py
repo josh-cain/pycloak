@@ -3,6 +3,7 @@ import json
 import logging
 import requests
 
+
 class Realm:
 
     def __init__(self, auth_session, realm_json):
@@ -22,3 +23,15 @@ class Realm:
             raise AdminException("Could not retrieve clients list.")
 
         return json.loads(clients_response.text)
+
+    def client(self, client_id):
+        # http://localhost:8080/auth/admin/realms/master/clients/1e6ff7ea-0812-4b95-b7d5-bfbe67c467f5
+        client_url = "{0}/auth/admin/realms/{1}/clients/{2}".format(
+            self.auth_session.host, self.realm, client_id)
+        client_response = requests.get(
+            client_url, headers=self.auth_session.bearer_header)
+
+        if (clients_response.status_code != 200):
+            raise AdminException("Could not retrieve clients list.")
+
+        return json.loads(client_response.text)

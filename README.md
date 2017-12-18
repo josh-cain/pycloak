@@ -8,8 +8,10 @@ import pycloak.auth
 
 session = pycloak.auth.AuthSession('admin', 'password')
 admin = pycloak.admin.Admin(session)
-admin.realms
-admin.realm('master')
+
+#admin.realms
+master = admin.realm('master')
+master.clients
 ```
 
 More to come soon!
