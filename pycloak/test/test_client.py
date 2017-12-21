@@ -55,7 +55,7 @@ def test_update_client(keycloak_server, admin_username, admin_password):
     assert updated_client.json['name'] == 'Test Update Client', 'Failed to properly update client'
 
 def test_delete_client(keycloak_server, admin_username, admin_password):
-    session = auth.AuthSession(admin_username, admin_password, host='http://localhost:8081')
+    session = auth.AuthSession(admin_username, admin_password)
     kc_admin = admin.Admin(session)
     created_client = kc_admin.realm('master').create_client('test-delete-client', "openid-connect")
     kc_admin.realm('master').delete_client(created_client.json['id'])
