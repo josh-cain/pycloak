@@ -42,3 +42,12 @@ Or, if python 3 is not the default:
 ```
 python -m pytest .
 ```
+
+### Deploying
+
+First, set up your local pypi config files.  see [this article](http://peterdowns.com/posts/first-time-with-pypi.html) for more.  Then just run:
+
+```
+python setup.py sdist upload -r pypitest
+python setup.py sdist upload -r pypi
+```
