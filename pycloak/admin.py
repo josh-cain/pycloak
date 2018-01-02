@@ -54,6 +54,15 @@ class Admin:
 
         return realm.Realm(self.auth_session, json.loads(realm_response.text))
 
+    def update_realm(self, realm):
+        realms_url = "{0}/auth/admin/realms/{1}".format(self.auth_session.host, realm.id)
+        realm_response = requests.put(realms_url, json=realm.json, headers=self.auth_session.bearer_header)
+
+        if (realm_response.status_code != 204):
+            raise AdminException("Could not add realm {}".format(realm_id))
+
+        return self.realm(realm.id)
+
 class AdminException:
 
     def __init__(self, *args, **kwargs):

@@ -11,7 +11,7 @@ class Realm:
         self.auth_session = auth_session
         self.id = realm_json.get('id')
         self.realm = realm_json.get('realm')
-        self.backing_json = realm_json
+        self.json = realm_json
 
     # TODO add an optional filter criteria to clients
     def clients(self):
