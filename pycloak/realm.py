@@ -2,21 +2,23 @@
 import json
 import logging
 import requests
-from pycloak import client
+from pycloak import client, merge
 
 
 class Realm:
 
-    def __init__(self, auth_session, realm_json):
+    def __init__(self, auth_session, json_rep=None, dict_rep=None):
+        if not json_rep and dict_rep:
+            json_rep = json.loads(json.dumps(dict_rep))
+
         self.auth_session = auth_session
-        self.id = realm_json.get('id')
-        self.realm = realm_json.get('realm')
-        self.json = realm_json
+        self.id = json_rep.get('id')
+        self.json = json_rep
 
     # TODO add an optional filter criteria to clients
     def clients(self):
         clients_url = "{0}/auth/admin/realms/{1}/clients".format(
-            self.auth_session.host, self.realm)
+            self.auth_session.host, self.id)
         clients_response = requests.get(
             clients_url, headers=self.auth_session.bearer_header, params={'viewableOnly': True})
 
@@ -27,7 +29,7 @@ class Realm:
 
     def client(self, id):
         client_url = "{0}/auth/admin/realms/{1}/clients/{2}".format(
-            self.auth_session.host, self.realm, id)
+            self.auth_session.host, self.id, id)
         client_response = requests.get(
             client_url, headers=self.auth_session.bearer_header)
 
@@ -42,7 +44,7 @@ class Realm:
 
     def create_client(self, client_id, protocol, rootUrl=None):
         create_client_url = "{0}/auth/admin/realms/{1}/clients".format(
-            self.auth_session.host, self.realm)
+            self.auth_session.host, self.id)
         create_client_response = requests.post(create_client_url, json={'enabled': True, 'attributes': {
         }, 'redirectUris': [], 'clientId': client_id, 'protocol': protocol, 'rootUrl': rootUrl}, headers=self.auth_session.bearer_header)
 
@@ -62,7 +64,7 @@ class Realm:
         return client.Client(self.auth_session, json.loads(new_client.text))
 
     def update_client(self, updated_client):
-        client_url = "{0}/auth/admin/realms/{1}/clients/{2}".format(self.auth_session.host, self.realm, updated_client.get('id'))
+        client_url = "{0}/auth/admin/realms/{1}/clients/{2}".format(self.auth_session.host, self.id, updated_client.get('id'))
         update_client_response = requests.put(client_url, json=updated_client, headers=self.auth_session.bearer_header)
 
         if update_client_response.status_code != 204:
@@ -75,11 +77,17 @@ class Realm:
         return client.Client(self.auth_session, json.loads(updated_client.text))
 
     def delete_client(self, id):
-        client_url = "{0}/auth/admin/realms/{1}/clients/{2}".format(self.auth_session.host, self.realm, id)
+        client_url = "{0}/auth/admin/realms/{1}/clients/{2}".format(self.auth_session.host, self.id, id)
         delete_client_response = requests.delete(client_url, headers=self.auth_session.bearer_header)
 
         if delete_client_response.status_code != 204:
             raise RealmException("Error attempting to delete client: {}".format(id))
+
+    def merge(self, other, prefer_self=False):
+        if prefer_self:
+            return merge.merge(self, other)
+        else:
+            return merge.merge(other, self)
 
 class RealmException(Exception):
     pass
