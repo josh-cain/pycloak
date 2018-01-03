@@ -57,5 +57,12 @@ class Admin:
 
         return self.realm(realm.id)
 
+    def delete_realm(self, realm_id):
+        realms_url = "{0}/auth/admin/realms/{1}".format(self.auth_session.host, realm_id)
+        realm_response = requests.delete(realms_url, headers=self.auth_session.bearer_header)
+
+        if (realm_response.status_code != 204):
+            raise AdminException("Could not delete realm {}".format(realm_id))
+
 class AdminException(Exception):
     pass
