@@ -44,6 +44,7 @@ def test_merge_realm(keycloak_server, admin_username, admin_password):
     merge_realm = realm.Realm(session, dict_rep={'id': 'merge-realm-test', 'accessCodeLifespan': 33})
     merge_result = new_realm.merge(merge_realm)
     assert merge_result.json['accessCodeLifespan'] == 33
+    assert merge_result.json['enabled'] == True
 
 def test_merge_realm_preferring_self(keycloak_server, admin_username, admin_password):
     session = auth.AuthSession(admin_username, admin_password)

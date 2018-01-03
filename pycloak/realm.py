@@ -85,9 +85,9 @@ class Realm:
 
     def merge(self, other, prefer_self=False):
         if prefer_self:
-            return merge.merge(self, other)
+            return Realm(self.auth_session, dict_rep=merge.merge(self.json, other.json))
         else:
-            return merge.merge(other, self)
+            return Realm(self.auth_session, dict_rep=merge.merge(other.json, self.json))
 
 class RealmException(Exception):
     pass
