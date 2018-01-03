@@ -25,7 +25,9 @@ class Admin:
         realms_url = "{0}/auth/admin/realms/{1}".format(self.auth_session.host, realm_name)
         realm_response = requests.get(realms_url, headers=self.auth_session.bearer_header)
 
-        if (realm_response.status_code != 200):
+        if (realm_response.status_code == 404):
+            return None
+        elif (realm_response.status_code != 200):
             raise AdminException("Could not retrieve realm {}".format(realm_name))
 
         return realm.Realm(self.auth_session, json_rep=json.loads(realm_response.text))

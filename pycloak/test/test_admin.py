@@ -14,6 +14,12 @@ def test_get_realm(keycloak_server, admin_username, admin_password):
     master = kc_admin.realm('master')
     assert master.id == 'master', 'master realm not found'
 
+def test_get_realm_not_found(keycloak_server, admin_username, admin_password):
+    session = auth.AuthSession(admin_username, admin_password)
+    kc_admin = admin.Admin(session)
+    nonexistent_realm = kc_admin.realm('none')
+    assert nonexistent_realm is None
+
 def test_add_realm(keycloak_server, admin_username, admin_password):
     session = auth.AuthSession(admin_username, admin_password)
     kc_admin = admin.Admin(session)
