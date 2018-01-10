@@ -17,10 +17,8 @@ class Realm:
 
     # TODO add an optional filter criteria to clients
     def clients(self):
-        clients_url = "{0}/auth/admin/realms/{1}/clients".format(
-            self.auth_session.host, self.id)
-        clients_response = requests.get(
-            clients_url, headers=self.auth_session.bearer_header, params={'viewableOnly': True})
+        clients_url = "{0}/auth/admin/realms/{1}/clients".format(self.auth_session.host, self.id)
+        clients_response = requests.get(clients_url, headers=self.auth_session.bearer_header, params={'viewableOnly': True})
 
         if (clients_response.status_code != 200):
             raise RealmException("Could not retrieve clients list.")
@@ -28,16 +26,13 @@ class Realm:
         return json.loads(clients_response.text)
 
     def client(self, id):
-        client_url = "{0}/auth/admin/realms/{1}/clients/{2}".format(
-            self.auth_session.host, self.id, id)
-        client_response = requests.get(
-            client_url, headers=self.auth_session.bearer_header)
+        client_url = "{0}/auth/admin/realms/{1}/clients/{2}".format(self.auth_session.host, self.id, id)
+        client_response = requests.get(client_url, headers=self.auth_session.bearer_header)
 
         if (client_response.status_code != 200):
-            raise RealmException(
-                "Could not retrieve clients for id: {}.  Did you specify using the clientId field instead of GUID?".format(id))
+            raise RealmException("Could not retrieve clients for id: {}.  Did you specify using the clientId field instead of GUID?".format(id))
 
-        return client.Client(self.auth_session, json.loads(client_response.text))
+        return client.Client(self.auth_session, json_rep=json.loads(client_response.text))
 
     def client_id(self, client_id):
         return next(filter(lambda client: client.get('clientId') == client_id, self.clients()), None)
@@ -51,17 +46,14 @@ class Realm:
         # TODO fix inconsistent errors... most things just throw an exception
         # instead of providing useful feedback
         if create_client_response.status_code != 201:
-            logging.error("Failed to create client: [{}]{}".format(
-                create_client_response.status_code, create_client_response.text))
-            raise RealmException(
-                "Could not create client with clientId: {}".format(client_id))
+            logging.error("Failed to create client: [{}]{}".format(create_client_response.status_code, create_client_response.text))
+            raise RealmException("Could not create client with clientId: {}".format(client_id))
 
-        new_client = requests.get(create_client_response.headers[
-                                  'Location'], headers=self.auth_session.bearer_header)
+        new_client = requests.get(create_client_response.headers['Location'], headers=self.auth_session.bearer_header)
         if new_client.status_code != 200:
             raise RealmException("Error attempting to retrieve newly created client: {}".format(client_id))
 
-        return client.Client(self.auth_session, json.loads(new_client.text))
+        return client.Client(self.auth_session, json_rep=json.loads(new_client.text))
 
     def update_client(self, updated_client):
         client_url = "{0}/auth/admin/realms/{1}/clients/{2}".format(self.auth_session.host, self.id, updated_client.get('id'))
@@ -74,7 +66,7 @@ class Realm:
         if updated_client.status_code != 200:
             raise RealmException("Error attempting to retrieve newly created client: {}".format(client_id))
 
-        return client.Client(self.auth_session, json.loads(updated_client.text))
+        return client.Client(self.auth_session, json_rep=json.loads(updated_client.text))
 
     def delete_client(self, id):
         client_url = "{0}/auth/admin/realms/{1}/clients/{2}".format(self.auth_session.host, self.id, id)

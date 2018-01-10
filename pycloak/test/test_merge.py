@@ -26,6 +26,10 @@ def test_basic_dict_merge_intersecting():
     result = merge.merge({'a': 1, 'c': 3}, {'a': 2, 'd': 4})
     assert {'a': 1, 'c': 3, 'd': 4} == result
 
+def test_basic_bool_merge_parallel():
+    result = merge.merge({'a': True, 'b': False}, {'a': False, 'b': True})
+    assert {'a': True, 'b': False} == result
+
 def test_nested_dict_merge_orthogonal():
     preferred = {'a': 1, 'b': 2, 'c': {'c1': 31, 'c2': 32}}
     secondary = {'d': 4, 'e': 5, 'f': {'f1': 61, 'f2': 62}}

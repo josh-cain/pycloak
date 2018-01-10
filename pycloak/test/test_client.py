@@ -1,6 +1,6 @@
 
 
-from pycloak import auth, admin, realm
+from pycloak import auth, admin, realm, client
 import pytest
 
 
@@ -60,3 +60,19 @@ def test_delete_client(keycloak_server, admin_username, admin_password):
     created_client = kc_admin.realm('master').create_client('test-delete-client', "openid-connect")
     kc_admin.realm('master').delete_client(created_client.json['id'])
     assert kc_admin.realm('master').client_id('test-delete-client') is None
+
+def test_merge_client(keycloak_server, admin_username, admin_password):
+    session = auth.AuthSession(admin_username, admin_password)
+    kc_admin = admin.Admin(session)
+    created_client = kc_admin.realm('master').create_client('test-merge-client', "openid-connect")
+    merging_client = client.Client(session, dict_rep={'clientId': 'test-merge-client', 'enabled': True, 'protocol': 'openid-connect', 'directAccessGrantsEnabled': False })
+    merged_client = created_client.merge(merging_client)
+    assert merged_client.json['directAccessGrantsEnabled'] == False
+
+def test_merge_client_preferred(keycloak_server, admin_username, admin_password):
+    session = auth.AuthSession(admin_username, admin_password)
+    kc_admin = admin.Admin(session)
+    created_client = kc_admin.realm('master').create_client('test-merge-prefer-client', "openid-connect")
+    merging_client = client.Client(session, dict_rep={'clientId': 'test-merge-prefer-client', 'enabled': True, 'protocol': 'openid-connect', 'directAccessGrantsEnabled': False })
+    merged_client = created_client.merge(merging_client, prefer_self=True)
+    assert merged_client.json['directAccessGrantsEnabled'] == True
