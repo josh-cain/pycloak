@@ -88,7 +88,7 @@ class AuthSession:
         if self.__access_token is None or is_expired(self.__access_token):
             if self.token is not None:
                 logging.debug('Using offline token grant to acquire access token.')
-                token_response = offline_token(self.offline_token, self.host, self.realm, self.client_id)
+                token_response = offline_token(self.token, self.host, self.realm, self.client_id)
             else:
                 logging.debug('Using direct access grant to acquire access token.')
                 token_response = direct_access_grant_token(self.username, self.password, self.host, self.realm, self.client_id)

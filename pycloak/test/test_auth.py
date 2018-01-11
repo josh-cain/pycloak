@@ -27,3 +27,8 @@ def test_use_offline_token(keycloak_server, admin_username, admin_password):
     direct_access_token_response = auth.direct_access_grant_token(admin_username, admin_password, include_offline=True)
     offline_token_response = auth.offline_token(direct_access_token_response['refresh_token'])
     assert offline_token_response.get('access_token') != None
+
+def test_create_session_offline_token(keycloak_server, admin_username, admin_password):
+    direct_access_token_response = auth.direct_access_grant_token(admin_username, admin_password, include_offline=True)
+    session = auth.AuthSession(offline_token=direct_access_token_response['refresh_token'])
+    assert session.get_access_token() is not None
