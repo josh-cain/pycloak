@@ -17,8 +17,8 @@ def test_get_offline_token(keycloak_server, admin_username, admin_password):
     session = auth.AuthSession(admin_username, admin_password)
     kc_admin = admin.Admin(session)
     admin_cli = kc_admin.realm('master').client_id('admin-cli')
-    admin_cli['fullScopeAllowed'] = 'true'
-    kc_admin.realm('master').update_client(admin_cli)
+    admin_cli.json['fullScopeAllowed'] = 'true'
+    kc_admin.realm('master').update_client(admin_cli.json)
 
     token_response = auth.direct_access_grant_token(admin_username, admin_password, include_offline=True)
     assert token_response.get('refresh_token') != None

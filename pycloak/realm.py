@@ -35,7 +35,11 @@ class Realm:
         return client.Client(self.auth_session, json_rep=json.loads(client_response.text))
 
     def client_id(self, client_id):
-        return next(filter(lambda client: client.get('clientId') == client_id, self.clients()), None)
+        client_json = next(filter(lambda client: client.get('clientId') == client_id, self.clients()), None)
+        if client_json:
+            return client.Client(self.auth_session, json_rep=client_json)
+        else:
+            return None
 
     def create_client(self, client_id, protocol, rootUrl=None):
         create_client_url = "{0}/auth/admin/realms/{1}/clients".format(
