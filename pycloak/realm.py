@@ -2,7 +2,7 @@
 import json
 import logging
 import requests
-from pycloak import client, merge
+from pycloak import client, merge, flow
 
 
 class Realm:
@@ -98,6 +98,7 @@ class Realm:
 
         return json.loads(get_fed_providers_response.text)
 
+    # TODO inconsistent verbiage + method names.  Going too fast, need to slow down and standardize
     def add_federation_provider(self, federation_provider):
         fed_provider_url = "{0}/auth/admin/realms/{1}/components".format(self.auth_session.host, self.id)
         add_fed_provider_response = requests.post(fed_provider_url, json=federation_provider,
@@ -147,6 +148,69 @@ class Realm:
 
     # TODO fed provider delete
 
+    def auth_flows(self):
+        """
+        Lists authentication flows for the given realm
+
+        :returns: json list of all authentication flows for the realm
+        """
+        auth_flows_url = "{0}/auth/admin/realms/{1}/authentication/flows".format(self.auth_session.host, self.id)
+        get_auth_flows_response = requests.get(auth_flows_url, headers=self.auth_session.bearer_header)
+
+        if get_auth_flows_response.status_code != 200:
+            raise RealmException("Error attempting to retrieve authentication flows for realm: {}".format(self.id))
+
+        # TODO make this OO? - is inconsistent
+        return json.loads(get_auth_flows_response.text)
+
+    # TODO generalize bad status code error handling.  I'm certain that there's a construct that will make this faster (perhaps 'with')?
+    def create_auth_flow(self, auth_flow):
+        """
+        Creates a new authentication flow
+
+        :param auth_flow: json object representing the new auth flow.  Ex: {"alias":"Test Flow","providerId":"basic-flow","description":"This flow is to test creation functions","topLevel":true,"builtIn":false}
+        :returns: json representation of the newly created flow
+        """
+        auth_flows_url = "{0}/auth/admin/realms/{1}/authentication/flows".format(self.auth_session.host, self.id)
+        create_auth_flow_response = requests.post(auth_flows_url, json=auth_flow, headers=self.auth_session.bearer_header)
+
+        if create_auth_flow_response.status_code != 201:
+            raise RealmException("Error attempting to create new auth flow: {0}/{1}".format(create_auth_flow_response.status_code, create_auth_flow_response.text))
+
+        get_new_flow_response = requests.get(create_auth_flow_response.headers['Location'], headers=self.auth_session.bearer_header)
+        if get_new_flow_response.status_code != 200:
+            raise RealmException("Error attempting to retrieve newly created auth flow: {0}/{1}".format(get_new_flow_response.status_code, get_new_flow_response.text))
+
+        return get_new_flow_response.text
+
+    def auth_flow(self, id=None, alias=None):
+        """
+        Retrieves a pycloak auth flow object by id or alias.  If both are given, id will be used.
+
+        :param id: GUID of the auth flow (I.E. "cdf3b8b6-5cdc-439d-b54a-5d375788af85")
+        :param alias: friendly name of the auth flow (I.E. "browser")
+        """
+        if id is not None:
+            auth_flow_url = "{0}/auth/admin/realms/{1}/authentication/flows/{2}".format(self.auth_session.host, self.id, id)
+            auth_flow_response = requests.get(auth_flow_url, headers=self.auth_session.bearer_header)
+
+            if auth_flow_response.status_code == 404:
+                return None
+            elif auth_flow_response.status_code == 200:
+                return flow.Flow(self, json_rep=json.loads(auth_flow_response.text))
+            else:
+                raise RealmException("Error attempting to retrieve auth flow by ID")
+
+        elif alias is not None:
+            flow_json = next(filter(lambda flow: flow.get('alias') == alias, self.auth_flows()), None)
+            if flow_json:
+                return flow.Flow(self, json_rep=flow_json)
+
+        # fall-through case
+        return None
+
+    # TODO general notes to self:
+    #  - on all lookup operations (GET), return None for not found status code, object if found, exception otherwise.  Enforce this library-wide
 
 class RealmException(Exception):
     pass
