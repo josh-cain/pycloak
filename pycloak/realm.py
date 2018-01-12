@@ -177,11 +177,15 @@ class Realm:
         if create_auth_flow_response.status_code != 201:
             raise RealmException("Error attempting to create new auth flow: {0}/{1}".format(create_auth_flow_response.status_code, create_auth_flow_response.text))
 
-        get_new_flow_response = requests.get(create_auth_flow_response.headers['Location'], headers=self.auth_session.bearer_header)
-        if get_new_flow_response.status_code != 200:
-            raise RealmException("Error attempting to retrieve newly created auth flow: {0}/{1}".format(get_new_flow_response.status_code, get_new_flow_response.text))
+        if create_auth_flow_response.headers.get('Location'):
+            get_new_flow_response = requests.get(create_auth_flow_response.headers['Location'], headers=self.auth_session.bearer_header)
+            if get_new_flow_response.status_code != 200:
+                raise RealmException("Error attempting to retrieve newly created auth flow: {0}/{1}".format(get_new_flow_response.status_code, get_new_flow_response.text))
 
-        return get_new_flow_response.text
+            return json.loads(get_new_flow_response.text)
+        # Older versions don't return a 'Location' header, so do this the wrong way.
+        else:
+            return auth_flow(alias=auth_flow['alias']).json
 
     def auth_flow(self, id=None, alias=None):
         """
