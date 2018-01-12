@@ -75,7 +75,7 @@ class Flow:
 
         # TODO keycloak PR for this, return at least a UID or something...
         if response.status_code != 204:
-            raise AuthFlowException("Error attempting to create new execution")
+            raise AuthFlowException("Error attempting to create new execution: {0}/{1}".format(response.status_code, response.text))
 
         return next(iter(self.executions(provider=execution['provider'])))
 

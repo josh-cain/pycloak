@@ -3,7 +3,7 @@ from distutils.core import setup
 setup(
     name='pycloak',
     packages=['pycloak','pycloak.test'],
-    version='0.2.3',
+    version='0.2.5',
     description='API for Keycloak Admin Interface',
     author='Josh Cain',
     author_email='jcain@redhat.com',
