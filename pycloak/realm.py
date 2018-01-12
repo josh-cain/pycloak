@@ -185,7 +185,7 @@ class Realm:
             return json.loads(get_new_flow_response.text)
         # Older versions don't return a 'Location' header, so do this the wrong way.
         else:
-            return auth_flow(alias=auth_flow['alias']).json
+            return self.auth_flow(alias=auth_flow['alias']).json
 
     def auth_flow(self, id=None, alias=None):
         """
@@ -193,6 +193,7 @@ class Realm:
 
         :param id: GUID of the auth flow (I.E. "cdf3b8b6-5cdc-439d-b54a-5d375788af85")
         :param alias: friendly name of the auth flow (I.E. "browser")
+        :return: pycloak object representing an auth flow
         """
         if id is not None:
             auth_flow_url = "{0}/auth/admin/realms/{1}/authentication/flows/{2}".format(self.auth_session.host, self.id, id)
