@@ -1,5 +1,5 @@
 
-from pycloak import auth, admin
+from pycloak import auth, admin, merge
 import pytest
 import json
 
@@ -66,11 +66,6 @@ def test_get_execution(keycloak_server, admin_username, admin_password):
     execution = master_realm.auth_flow(alias='browser').execution(id=executions[0]['id'])
     assert execution is not None
 
-def test_get_execution_by_name(keycloak_server, admin_username, admin_password):
-    session = auth.AuthSession(admin_username, admin_password)
-    master_realm = admin.Admin(session).realm('master')
-    execution = master_realm.auth_flow(alias='browser').execution(name='Cookie')
-    assert execution is not None
 
 def test_create_execution(keycloak_server, admin_username, admin_password):
     session = auth.AuthSession(admin_username, admin_password)
@@ -85,6 +80,15 @@ def test_update_execution(keycloak_server, admin_username, admin_password):
     master_realm = admin.Admin(session).realm('master')
     form_execution = json.loads(json.dumps({'provider': 'auth-username-password-form'}))
     created_execution = master_realm.auth_flow(alias='test flow').create_execution(form_execution)
-    assert created_execution['requirement'] != 'REQUIRED', "test is brittle, assumes pre-conditions, and fails"
-    created_execution['requirement'] = 'REQUIRED'
-    assert master_realm.auth_flow(alias='test flow').update_execution(created_execution)['requirement'] == 'REQUIRED'
+    assert created_execution.json['requirement'] != 'REQUIRED', "test is brittle, assumes pre-conditions, and fails"
+    created_execution.json['requirement'] = 'REQUIRED'
+    assert master_realm.auth_flow(alias='test flow').update_execution(created_execution.json).json['requirement'] == 'REQUIRED'
+
+def test_delete_execution(keycloak_server, admin_username, admin_password):
+    session = auth.AuthSession(admin_username, admin_password)
+    master_realm = admin.Admin(session).realm('master')
+    executions = master_realm.auth_flow(alias='test flow').executions()
+    executions_before_delete = len(executions)
+    response = master_realm.auth_flow(alias='test flow').delete_execution(executions[0]['id'])
+    assert response.status_code == 204
+    assert len(master_realm.auth_flow(alias='test flow').executions()) < executions_before_delete

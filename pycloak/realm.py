@@ -169,7 +169,7 @@ class Realm:
         Creates a new authentication flow
 
         :param auth_flow: json object representing the new auth flow.  Ex: {"alias":"Test Flow","providerId":"basic-flow","description":"This flow is to test creation functions","topLevel":true,"builtIn":false}
-        :returns: json representation of the newly created flow
+        :returns: pycloak object representation of the newly created flow
         """
         auth_flows_url = "{0}/auth/admin/realms/{1}/authentication/flows".format(self.auth_session.host, self.id)
         create_auth_flow_response = requests.post(auth_flows_url, json=auth_flow, headers=self.auth_session.bearer_header)
@@ -182,7 +182,7 @@ class Realm:
             if get_new_flow_response.status_code != 200:
                 raise RealmException("Error attempting to retrieve newly created auth flow: {0}/{1}".format(get_new_flow_response.status_code, get_new_flow_response.text))
 
-            return json.loads(get_new_flow_response.text)
+            return flow.Flow(self, json_rep=json.loads(get_new_flow_response.text))
         # Older versions don't return a 'Location' header, so do this the wrong way.
         else:
             return self.auth_flow(alias=auth_flow['alias']).json
@@ -213,6 +213,17 @@ class Realm:
 
         # fall-through case
         return None
+
+    def auth_config(self, id):
+        url = "{0}/auth/admin/realms/{1}/authentication/config/{2}".format(self.auth_session.host, self.id, id)
+        response = requests.get(url, headers=self.auth_session.bearer_header)
+
+        if response.status_code == 404:
+            return None
+        elif response.status_code == 200:
+            return json.loads(response.text)
+        else:
+            raise RealmException("Error occurred attempting to retrieve config")
 
     # TODO general notes to self:
     #  - on all lookup operations (GET), return None for not found status code, object if found, exception otherwise.  Enforce this library-wide
