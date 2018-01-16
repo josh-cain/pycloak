@@ -92,3 +92,15 @@ def test_delete_execution(keycloak_server, admin_username, admin_password):
     response = master_realm.auth_flow(alias='test flow').delete_execution(executions[0]['id'])
     assert response.status_code == 204
     assert len(master_realm.auth_flow(alias='test flow').executions()) < executions_before_delete
+
+def test_delete_all_executions(keycloak_server, admin_username, admin_password):
+    session = auth.AuthSession(admin_username, admin_password)
+    master_realm = admin.Admin(session).realm('master')
+    auth_flow = {'alias': 'test flow2', 'providerId': 'basic-flow', 'description': 'This flow is used for test purposes', 'topLevel': 'true', 'builtIn': 'false'}
+    test_flow2 = admin.Admin(session).realm('master').create_auth_flow(json.loads(json.dumps(auth_flow)))
+    test_flow2.create_execution({'provider': 'auth-username-password-form'})
+    test_flow2.create_execution({'provider': 'identity-provider-redirector'})
+    test_flow2.create_execution({'provider': 'auth-spnego'})
+    assert len(master_realm.auth_flow(alias='test flow2').executions()) == 3
+    test_flow2.delete_all_executions()
+    assert len(master_realm.auth_flow(alias='test flow2').executions()) == 0

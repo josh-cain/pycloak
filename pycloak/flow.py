@@ -112,6 +112,17 @@ class Flow:
         #TODO feels wrong - return something else here
         return response
 
+    def delete_all_executions(self):
+        """
+        Convenience method for remove all executions associated with this flow
+
+        :return: fresh flow object with executions removed.
+        """
+        for execution in self.executions():
+            self.delete_execution(execution['id'])
+
+        return self.realm.auth_flow(id=self.id)
+
 
     def create_child_flow(self, child_flow):
         """
