@@ -28,7 +28,7 @@ class Admin:
         if (realm_response.status_code == 404):
             return None
         elif (realm_response.status_code != 200):
-            raise AdminException("Could not retrieve realm {0}, got: {1}/{2}".format(realm_name, response.status_code, response.text))
+            raise AdminException("Could not retrieve realm {0}, got: {1}/{2}".format(realm_name, realm_response.status_code, realm_response.text))
 
         return realm.Realm(self.auth_session, json_rep=json.loads(realm_response.text))
 
