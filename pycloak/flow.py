@@ -95,7 +95,7 @@ class Flow:
         response = requests.put(url, json=execution, headers=self.realm.auth_session.bearer_header)
 
         if response.status_code != 204:
-            raise AuthFlowException("Error attempting to update execution")
+            raise AuthFlowException("Error attempting to update execution: {0}/{1}".format(response.status_code, response.text))
 
         return self.execution(id=execution['id'])
 
