@@ -183,9 +183,10 @@ class Realm:
                 raise RealmException("Error attempting to retrieve newly created auth flow: {0}/{1}".format(get_new_flow_response.status_code, get_new_flow_response.text))
 
             return flow.Flow(self, json_rep=json.loads(get_new_flow_response.text))
+            
         # Older versions don't return a 'Location' header, so do this the wrong way.
         else:
-            return self.auth_flow(alias=auth_flow['alias']).json
+            return self.auth_flow(alias=auth_flow['alias'])
 
     def auth_flow(self, id=None, alias=None):
         """
